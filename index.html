@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#090d16">
+    <title>SistemX Electric | Preditiva &amp; Confiabilidade NEMA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://unpkg.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script defer src="https://unpkg.com/@phosphor-icons/web@2.1.1" integrity="sha384-cPFV+/abYd3INVFHPmSKpBmcnH+Q+bTZW7dv/EiuShUNPkHyFmRF8PsL7Ibfvunk" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js" integrity="sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ" crossorigin="anonymous"></script>
+    <style>
+        :root[data-theme="dark"] {
+            color-scheme: dark;
+            --bg-body: #090d16;
+            --bg-card: #111827;
+            --bg-card-hover: #1f2937;
+            --bg-sidebar: #0b0f19;
+            --border: #1f2937;
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+            --text-sub: #6b7280;
+            --accent: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, .18);
+            --success: #10b981;
+            --success-glow: rgba(16, 185, 129, .15);
+            --warning: #f59e0b;
+            --warning-glow: rgba(245, 158, 11, .15);
+            --danger: #ef4444;
+            --danger-glow: rgba(239, 68, 68, .15);
+            --input-bg: #1f2937;
+            --chart-text: #9ca3af;
+            --chart-grid: rgba(156, 163, 175, .15);
+        }
+
+        :root[data-theme="light"] {
+            color-scheme: light;
+            --bg-body: #f3f4f6;
+            --bg-card: #fff;
+            --bg-card-hover: #f9fafb;
+            --bg-sidebar: #fff;
+            --border: #e5e7eb;
+            --text-main: #111827;
+            --text-muted: #4b5563;
+            --text-sub: #6b7280;
+            --accent: #2563eb;
+            --accent-glow: rgba(37, 99, 235, .12);
+            --success: #059669;
+            --success-glow: rgba(5, 150, 105, .12);
+            --warning: #b45309;
+            --warning-glow: rgba(217, 119, 6, .12);
+            --danger: #dc2626;
+            --danger-glow: rgba(220, 38, 38, .12);
+            --input-bg: #f3f4f6;
+            --chart-text: #4b5563;
+            --chart-grid: rgba(31, 41, 55, .12);
+        }
+
+        * { box-sizing: border-box; }
+        html { height: 100%; overflow: hidden; }
+        body {
+            min-width: 320px;
+            height: 100vh;
+            height: 100dvh;
+            min-height: 0;
+            margin: 0;
+            display: flex;
+            overflow: hidden;
+            background: var(--bg-body);
+            color: var(--text-main);
+            font-family: "Plus Jakarta Sans", sans-serif;
+        }
+
+        button, input, select { font: inherit; }
+        button, a, input, select { -webkit-tap-highlight-color: transparent; }
+        button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+            outline: 3px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .sidebar {
+            z-index: 2;
+            width: 264px;
+            flex: 0 0 264px;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow-y: auto;
+            padding: 24px 18px;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+        }
+        .brand { display: flex; align-items: center; gap: 12px; padding: 0 8px; font-size: 1.15rem; font-weight: 800; letter-spacing: -.5px; }
+        .brand i { color: var(--accent); font-size: 1.8rem; }
+        .brand-accent { color: var(--accent); }
+        .nav-group { display: grid; gap: 8px; margin-top: 34px; }
+        .nav-item {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border: 1px solid transparent;
+            border-radius: 12px;
+            background: transparent;
+            color: var(--text-muted);
+            text-align: left;
+            font-size: .9rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .nav-item i { font-size: 1.2rem; }
+        .nav-item:hover { background: var(--bg-card-hover); color: var(--text-main); }
+        .nav-item.active { border-color: var(--accent-glow); background: var(--accent-glow); color: var(--accent); }
+        .sidebar-footer { padding-top: 18px; border-top: 1px solid var(--border); }
+        .source-link { color: var(--accent); font-size: .8rem; line-height: 1.5; text-decoration: none; }
+        .source-link:hover { text-decoration: underline; }
+
+        .main {
+            min-width: 0;
+            min-height: 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            overflow: auto;
+            padding: 28px 32px 40px;
+            scroll-behavior: smooth;
+        }
+        .topbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+        .topbar h1 { margin: 0; font-size: clamp(1.35rem, 2.5vw, 1.75rem); letter-spacing: -.7px; }
+        .topbar p { margin: 6px 0 0; color: var(--text-muted); font-size: .9rem; line-height: 1.5; }
+        .actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 10px; }
+        .btn {
+            min-height: 42px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 9px 14px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-card);
+            color: var(--text-main);
+            font-size: .85rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .btn:hover:not(:disabled) { background: var(--bg-card-hover); }
+        .btn:disabled { cursor: not-allowed; opacity: .55; }
+        .btn-primary { border-color: var(--accent); background: var(--accent); color: #fff; }
+        .btn-primary:hover:not(:disabled) { background: #2563eb; }
+
+        .sync-row { min-height: 38px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+        .sync-status { display: inline-flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: .82rem; }
+        .status-dot { width: 9px; height: 9px; flex: 0 0 9px; border-radius: 50%; background: var(--text-sub); }
+        .sync-status[data-state="loading"] .status-dot,
+        .sync-status[data-state="refreshing"] .status-dot { background: var(--warning); animation: pulse 1.4s ease-in-out infinite; }
+        .sync-status[data-state="online"] .status-dot { background: var(--success); }
+        .sync-status[data-state="error"] .status-dot { background: var(--danger); }
+        .last-updated { color: var(--text-sub); font-size: .78rem; }
+        .access-note { margin: -18px 0 0; color: var(--text-sub); font-size: .76rem; line-height: 1.5; }
+        .sync-message { margin: 0; padding: 11px 14px; border: 1px solid var(--warning); border-radius: 10px; background: var(--warning-glow); color: var(--text-main); font-size: .85rem; line-height: 1.5; }
+        .sync-message[data-state="error"] { border-color: var(--danger); background: var(--danger-glow); }
+        .sync-message[hidden] { display: none; }
+
+        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; }
+        .metric-card {
+            position: relative;
+            min-width: 0;
+            min-height: 124px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 9px;
+            overflow: hidden;
+            padding: 18px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: var(--bg-card);
+        }
+        .metric-title { max-width: calc(100% - 34px); color: var(--text-muted); font-size: .76rem; font-weight: 700; letter-spacing: .35px; text-transform: uppercase; }
+        .metric-value { overflow-wrap: anywhere; font-size: clamp(1.35rem, 3vw, 1.9rem); font-weight: 800; letter-spacing: -.7px; }
+        .metric-value.compact { font-size: 1.05rem; letter-spacing: 0; }
+        .metric-icon { position: absolute; top: 17px; right: 17px; color: var(--accent); font-size: 1.4rem; opacity: .55; }
+
+        .panel { min-width: 0; display: flex; flex-direction: column; gap: 18px; padding: 22px; border: 1px solid var(--border); border-radius: 18px; background: var(--bg-card); }
+        .panel-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; }
+        .panel-title { display: flex; align-items: center; gap: 10px; font-size: 1.03rem; font-weight: 700; }
+        .panel-title i { color: var(--accent); font-size: 1.2rem; }
+        .panel-note { margin: 0; color: var(--text-muted); font-size: .82rem; line-height: 1.5; }
+        .filters { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .filter-control { min-height: 42px; max-width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--input-bg); color: var(--text-main); font-size: .85rem; }
+        .table-responsive { width: 100%; overflow: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: .84rem; }
+        caption { padding: 0 0 10px; color: var(--text-muted); text-align: left; }
+        th, td { padding: 12px 13px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        th { position: sticky; top: 0; z-index: 1; background: var(--bg-card); color: var(--text-muted); font-size: .72rem; font-weight: 700; letter-spacing: .35px; text-transform: uppercase; }
+        tbody tr:hover { background: var(--bg-card-hover); }
+        .numeric { text-align: right; font-variant-numeric: tabular-nums; }
+        .badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 9px; border: 1px solid transparent; border-radius: 20px; font-size: .72rem; font-weight: 700; white-space: nowrap; }
+        .badge-normal { border-color: var(--success-glow); background: var(--success-glow); color: var(--success); }
+        .badge-alerta { border-color: var(--warning-glow); background: var(--warning-glow); color: var(--warning); }
+        .badge-critico { border-color: var(--danger-glow); background: var(--danger-glow); color: var(--danger); }
+        .chart-box { position: relative; width: 100%; height: 290px; }
+        .chart-box.compact { height: 260px; }
+        .empty-state { padding: 24px 12px; color: var(--text-muted); text-align: center; font-size: .9rem; line-height: 1.6; }
+        .unit-meta { min-height: 20px; color: var(--text-muted); font-size: .82rem; }
+        .hidden { display: none !important; }
+        .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; clip-path: inset(50%); }
+
+        @keyframes pulse { 50% { opacity: .35; } }
+        @media (max-width: 980px) {
+            .sidebar { width: 220px; flex-basis: 220px; padding: 20px 14px; }
+            .main { padding: 24px 22px 32px; }
+            .topbar { flex-wrap: wrap; }
+            .actions { justify-content: flex-start; }
+        }
+        @media (max-width: 680px) {
+            html { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: auto; }
+            body { height: auto; min-height: 100vh; min-height: 100dvh; display: block; overflow-x: hidden; overflow-y: auto; }
+            .sidebar { position: sticky; top: 0; width: 100%; padding: 12px 14px 10px; border-right: 0; border-bottom: 1px solid var(--border); }
+            .sidebar > div:first-child { display: block; }
+            .brand { padding: 0 4px; font-size: 1rem; }
+            .brand i { font-size: 1.45rem; }
+            .nav-group { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin: 10px 0 0; overflow: visible; }
+            .nav-item { width: 100%; min-width: 0; justify-content: flex-start; padding: 9px 11px; font-size: .76rem; white-space: normal; }
+            .nav-item:last-child { grid-column: 1 / -1; }
+            .nav-item i { font-size: 1rem; }
+            .sidebar-footer { display: none; }
+            .main { gap: 17px; overflow: visible; padding: 19px 14px 30px; }
+            .topbar { gap: 14px; }
+            .topbar p { font-size: .82rem; }
+            .actions { width: 100%; }
+            .actions .btn { flex: 1; }
+            .metrics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+            .metric-card { min-height: 108px; padding: 14px; }
+            .metric-title { font-size: .68rem; }
+            .metric-icon { top: 12px; right: 12px; }
+            .panel { gap: 14px; padding: 16px 13px; border-radius: 15px; }
+            .panel-title { font-size: .94rem; }
+            .filters { width: 100%; }
+            .filters > * { min-width: 0; flex: 1 1 145px; }
+            .chart-box { height: 250px; }
+            th, td { padding: 10px 9px; }
+        }
+        @media (max-width: 380px) {
+            .main { padding-right: 10px; padding-left: 10px; }
+            .sidebar { padding-right: 10px; padding-left: 10px; }
+            .metrics-grid { grid-template-columns: minmax(0, 1fr); }
+            .actions .btn { gap: 5px; padding-right: 8px; padding-left: 8px; font-size: .76rem; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar" aria-label="Navegação principal">
+        <div>
+            <div class="brand">
+                <i class="ph-bold ph-lightning" aria-hidden="true"></i>
+                <span>SistemX <span class="brand-accent">Electric</span></span>
+            </div>
+            <nav class="nav-group" aria-label="Seções">
+                <button class="nav-item active" type="button" data-view="dash" aria-current="page">
+                    <i class="ph-bold ph-squares-four" aria-hidden="true"></i> Visão Executiva
+                </button>
+                <button class="nav-item" type="button" data-view="analytics">
+                    <i class="ph-bold ph-activity" aria-hidden="true"></i> Diagnóstico NEMA
+                </button>
+                <button class="nav-item" type="button" data-view="unidades">
+                    <i class="ph-bold ph-buildings" aria-hidden="true"></i> Gestão de Unidades
+                </button>
+            </nav>
+        </div>
+        <div class="sidebar-footer">
+            <a class="source-link" href="https://docs.google.com/spreadsheets/d/e/2PACX-1vQwuDz1bwGUXs15qQOuHpELezV5lsASiYTZOp9luWH7CDLUIX3f3drh253oQi7-UjwTiYJ2gitjdsKH/pubhtml?widget=true&amp;headers=false" target="_blank" rel="noopener noreferrer">
+                Abrir planilha publicada <i class="ph-bold ph-arrow-square-out" aria-hidden="true"></i>
+            </a>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div>
+                <h1 id="view-title">Visão Executiva</h1>
+                <p id="view-subtitle">Acompanhamento online de medições e confiabilidade elétrica.</p>
+            </div>
+            <div class="actions">
+                <button class="btn" id="theme-button" type="button" aria-pressed="false">
+                    <i class="ph-bold ph-moon-stars" id="theme-icon" aria-hidden="true"></i>
+                    <span>Modo</span>
+                </button>
+                <button class="btn btn-primary" id="refresh-button" type="button">
+                    <i class="ph-bold ph-arrows-clockwise" aria-hidden="true"></i>
+                    <span>Atualizar agora</span>
+                </button>
+                <button class="btn" id="export-button" type="button" disabled>
+                    <i class="ph-bold ph-download-simple" aria-hidden="true"></i>
+                    <span>Exportar CSV</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="sync-row">
+            <div class="sync-status" id="sync-status" data-state="loading" role="status" aria-live="polite">
+                <span class="status-dot" aria-hidden="true"></span>
+                <span id="sync-label">Carregando dados publicados...</span>
+            </div>
+            <span class="last-updated" id="last-updated">Atualização automática a cada 30 segundos</span>
+        </div>
+        <p class="access-note">Para usar em outros computadores, abra uma cópia atualizada deste arquivo com conexão à internet. Os dados continuam vindo da planilha online.</p>
+        <p class="sync-message" id="sync-message" role="status" aria-live="polite" hidden></p>
+
+        <section id="sec-dash" aria-labelledby="view-title">
+            <div class="metrics-grid" id="metrics-grid" aria-live="polite"></div>
+            <section class="panel" aria-labelledby="overview-title" style="margin-top: 18px;">
+                <div class="panel-header">
+                    <h2 class="panel-title" id="overview-title"><i class="ph-bold ph-chart-donut" aria-hidden="true"></i> Situação das unidades</h2>
+                    <span class="panel-note" id="source-updated"></span>
+                </div>
+                <p class="panel-note" id="unit-data-status" role="status" aria-live="polite">Carregando medições das unidades...</p>
+                <div class="chart-box">
+                    <canvas id="overview-chart" role="img" aria-label="Gráfico de unidades em dia e em atraso"></canvas>
+                </div>
+            </section>
+            <section class="panel" aria-labelledby="dashboard-units-title" style="margin-top: 18px;">
+                <div class="panel-header">
+                    <h2 class="panel-title" id="dashboard-units-title"><i class="ph-bold ph-list-checks" aria-hidden="true"></i> Acompanhamento por unidade</h2>
+                    <label class="sr-only" for="unit-search">Filtrar unidades</label>
+                    <input class="filter-control" id="unit-search" type="search" placeholder="Buscar unidade ou técnico">
+                </div>
+                <div class="table-responsive">
+                    <table aria-label="Status de envio por unidade">
+                        <thead><tr><th>Unidade</th><th>Técnico responsável</th><th>Data da medição</th><th class="numeric">Dias em atraso</th><th>Status</th></tr></thead>
+                        <tbody id="tb-unidades"></tbody>
+                    </table>
+                    <p class="empty-state hidden" id="units-empty">Aguardando dados das unidades na planilha publicada.</p>
+                </div>
+            </section>
+        </section>
+
+        <section id="sec-analytics" class="hidden" aria-labelledby="analytics-title">
+            <section class="panel">
+                <div class="panel-header">
+                    <div>
+                        <h2 class="panel-title" id="analytics-title"><i class="ph-bold ph-activity" aria-hidden="true"></i> Leituras trifásicas &amp; diagnóstico NEMA</h2>
+                        <p class="panel-note">Desequilíbrio = maior desvio da corrente em relação à média das fases. Acima de 5%: alerta; acima de 10%: crítico, conforme os critérios deste painel. Essa análise de corrente não substitui a avaliação normativa de desequilíbrio de tensão da NEMA MG 1.</p>
+                        <p class="panel-note">Leituras somente para consulta. Edite os dados na planilha de origem para publicá-los.</p>
+                    </div>
+                    <div class="filters">
+                        <label class="sr-only" for="sel-unidade">Unidade operacional</label>
+                        <select id="sel-unidade" class="filter-control"></select>
+                        <label class="sr-only" for="search-equip">Buscar equipamento</label>
+                        <input id="search-equip" class="filter-control" type="search" placeholder="Buscar equipamento">
+                    </div>
+                </div>
+                <p class="unit-meta" id="unit-meta"></p>
+                <div class="chart-box compact">
+                    <canvas id="unit-chart" role="img" aria-label="Gráfico das correntes das fases R, S e T"></canvas>
+                </div>
+                <div class="table-responsive">
+                    <table aria-label="Medições e diagnóstico NEMA por equipamento">
+                        <thead><tr><th>Equipamento</th><th class="numeric">CV</th><th class="numeric">RPM</th><th class="numeric">kW</th><th class="numeric">R (A)</th><th class="numeric">S (A)</th><th class="numeric">T (A)</th><th class="numeric">Média (A)</th><th class="numeric">Desequilíbrio</th><th>Diagnóstico</th></tr></thead>
+                        <tbody id="tb-analytics"></tbody>
+                    </table>
+                    <p class="empty-state hidden" id="motors-empty">Esta aba não contém medições publicadas ou ainda está sendo carregada.</p>
+                </div>
+            </section>
+        </section>
+
+        <section id="sec-unidades" class="hidden" aria-labelledby="units-title">
+            <section class="panel">
+                <div class="panel-header">
+                    <div>
+                        <h2 class="panel-title" id="units-title"><i class="ph-bold ph-buildings" aria-hidden="true"></i> Status de envio por unidade operacional</h2>
+                        <p class="panel-note">Este resumo é lido da aba “ULTIMA ATUALIZAÇÃO” da planilha publicada.</p>
+                    </div>
+                    <label class="sr-only" for="unit-search-secondary">Filtrar unidades</label>
+                    <input class="filter-control" id="unit-search-secondary" type="search" placeholder="Buscar unidade ou técnico">
+                </div>
+                <div class="table-responsive">
+                    <table aria-label="Status de envio por unidade operacional">
+                        <thead><tr><th>Unidade</th><th>Técnico responsável</th><th>Data da medição</th><th class="numeric">Dias em atraso</th><th>Status</th></tr></thead>
+                        <tbody id="tb-unidades-secondary"></tbody>
+                    </table>
+                    <p class="empty-state hidden" id="units-secondary-empty">Aguardando dados das unidades na planilha publicada.</p>
+                </div>
+            </section>
+        </section>
+    </main>
+
+    <script>
+        const SPREADSHEET_ID = '2PACX-1vQwuDz1bwGUXs15qQOuHpELezV5lsASiYTZOp9luWH7CDLUIX3f3drh253oQi7-UjwTiYJ2gitjdsKH';
+        const PUBLISHED_URL = `https://docs.google.com/spreadsheets/d/e/${SPREADSHEET_ID}/pub`;
+        const REFRESH_INTERVAL = 30_000;
+        const SUMMARY_SHEETS = {
+            indicators: '129171510',
+            units: '0'
+        };
+        const UNIT_SHEETS = [
+            ['PORTO FELIZ', '1273961353'],
+            ['ENGEPAC RIO CLARO', '1430032791'],
+            ['PEDRA BRANCA', '149886368'],
+            ['CAPIVARI', '2118173447'],
+            ['REMANSO', '1715473195'],
+            ['ATIBAIA', '718126738'],
+            ['SALTO DE PIRAPORA', '1944770234'],
+            ['BONATO', '358437065'],
+            ['JAGUARIUNA', '1395401635'],
+            ['TATUI', '1101316950'],
+            ['BOFETE', '369313737'],
+            ['MINERMIX ANHEMBI', '1746110757'],
+            ['CURUMIM ANHEMBI', '1360857963'],
+            ['CURUMIM RAFARD', '1749367453'],
+            ['PORTO BOITUVA', '2084506492']
+        ].map(([name, gid]) => ({ name, gid }));
+        const EMPTY_UNIT_SHEETS = new Set(['358437065', '1749367453']);
+
+        const state = {
+            view: 'dash',
+            selectedUnit: UNIT_SHEETS[0],
+            currentUnit: null,
+            unitRows: [],
+            indicatorRows: [],
+            indicatorCsv: null,
+            summaryCsv: null,
+            unitCache: new Map(),
+            requests: new Map(),
+            refreshing: false,
+            refreshingUnits: false,
+            exporting: false,
+            lastSuccess: null,
+            overviewChart: null,
+            unitChart: null,
+            refreshTimer: null
+        };
+
+        const $ = (selector) => document.querySelector(selector);
+        const normalizeText = (value) => String(value ?? '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .trim()
+            .toUpperCase()
+            .replace(/\s+/g, ' ');
+
+        function parseCsv(text) {
+            const rows = [];
+            let row = [];
+            let value = '';
+            let quoted = false;
+
+            for (let i = 0; i < text.length; i += 1) {
+                const char = i === 0 && text.charCodeAt(0) === 0xFEFF ? '' : text[i];
+                if (!char) continue;
+                if (quoted) {
+                    if (char === '"' && text[i + 1] === '"') {
+                        value += '"';
+                        i += 1;
+                    } else if (char === '"') {
+                        quoted = false;
+                    } else {
+                        value += char;
+                    }
+                } else if (char === '"' && value.length === 0) {
+                    quoted = true;
+                } else if (char === ',') {
+                    row.push(value);
+                    value = '';
+                } else if (char === '\n' || char === '\r') {
+                    if (char === '\r' && text[i + 1] === '\n') i += 1;
+                    row.push(value);
+                    if (row.some((cell) => cell.trim() !== '')) rows.push(row);
+                    row = [];
+                    value = '';
+                } else {
+                    value += char;
+                }
+            }
+            if (value.length || row.length) {
+                row.push(value);
+                if (row.some((cell) => cell.trim() !== '')) rows.push(row);
+            }
+            return rows;
+        }
+
+        function parseNumber(value) {
+            const text = String(value ?? '').trim().replace(/\s/g, '');
+            if (!text) return null;
+            let normalized = text;
+            if (normalized.includes(',') && normalized.includes('.')) {
+                normalized = normalized.lastIndexOf(',') > normalized.lastIndexOf('.')
+                    ? normalized.replace(/\./g, '').replace(',', '.')
+                    : normalized.replace(/,/g, '');
+            } else if (normalized.includes(',')) {
+                normalized = normalized.replace(',', '.');
+            }
+            const number = Number(normalized);
+            return Number.isFinite(number) ? number : null;
+        }
+
+        function sheetUrl(gid) {
+            const separator = PUBLISHED_URL.includes('?') ? '&' : '?';
+            return `${PUBLISHED_URL}${separator}output=csv&gid=${encodeURIComponent(gid)}&_=${Date.now()}`;
+        }
+
+        async function fetchSheet(gid) {
+            if (state.requests.has(gid)) return state.requests.get(gid);
+            const request = (async () => {
+                const controller = new AbortController();
+                const timeout = window.setTimeout(() => controller.abort(), 15_000);
+                try {
+                    const response = await fetch(sheetUrl(gid), {
+                        cache: 'no-store',
+                        signal: controller.signal
+                    });
+                    if (!response.ok) throw new Error(`A planilha respondeu com o status ${response.status}.`);
+                    return await response.text();
+                } finally {
+                    window.clearTimeout(timeout);
+                    state.requests.delete(gid);
+                }
+            })();
+            state.requests.set(gid, request);
+            return request;
+        }
+
+        async function fetchBatch(sheets, concurrency = 4, onResult = null) {
+            const results = new Array(sheets.length);
+            let nextIndex = 0;
+            const workers = Array.from({ length: Math.min(concurrency, sheets.length) }, async () => {
+                while (nextIndex < sheets.length) {
+                    const index = nextIndex;
+                    nextIndex += 1;
+                    try {
+                        results[index] = { status: 'fulfilled', value: await fetchSheet(sheets[index].gid) };
+                    } catch (reason) {
+                        results[index] = { status: 'rejected', reason };
+                    }
+                    if (onResult) await onResult(index, results[index]);
+                }
+            });
+            await Promise.all(workers);
+            return results;
+        }
+
+        function setSyncStatus(status, label, message = '') {
+            const statusElement = $('#sync-status');
+            statusElement.dataset.state = status;
+            $('#sync-label').textContent = label;
+            const messageElement = $('#sync-message');
+            messageElement.hidden = !message;
+            messageElement.dataset.state = status;
+            messageElement.textContent = message;
+            $('#refresh-button').disabled = status === 'loading' || status === 'refreshing';
+            $('#refresh-button').setAttribute('aria-busy', String(status === 'loading' || status === 'refreshing'));
+            if (state.lastSuccess) {
+                $('#last-updated').textContent = `Última consulta: ${state.lastSuccess.toLocaleTimeString('pt-BR')}. Atualização automática a cada 30 segundos.`;
+            }
+        }
+
+        function formatDate(value) {
+            const text = String(value ?? '').trim();
+            const match = text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if (!match) return text || '—';
+            return `${match[1].padStart(2, '0')}/${match[2].padStart(2, '0')}/${match[3]}`;
+        }
+
+        function extractSourceTimestamp(rows) {
+            const firstRow = rows[0] || [];
+            const timestamp = firstRow.find((cell) => /\d{1,2}\/\d{1,2}\/\d{4}/.test(cell));
+            return timestamp ? timestamp.trim() : '';
+        }
+
+        function collectIndicatorValues(rows) {
+            const pairs = [];
+            rows.forEach((row, rowIndex) => {
+                row.forEach((cell, columnIndex) => {
+                    const label = String(cell ?? '').trim();
+                    if (!label || parseNumber(label) !== null) return;
+                    const sameRowValue = row.slice(columnIndex + 1).find((item) => String(item ?? '').trim() !== '');
+                    const nextRowValue = rows[rowIndex + 1]?.[columnIndex];
+                    const populatedLabels = row.filter((item) => String(item ?? '').trim() && parseNumber(item) === null);
+                    const nextIsValue = nextRowValue !== undefined
+                        && String(nextRowValue).trim()
+                        && (parseNumber(nextRowValue) !== null || populatedLabels.length > 1);
+                    if (nextIsValue) pairs.push([normalizeText(label), String(nextRowValue).trim()]);
+                    if (sameRowValue !== undefined) pairs.push([normalizeText(label), String(sameRowValue).trim()]);
+                    if (!nextIsValue && nextRowValue !== undefined && String(nextRowValue).trim()) {
+                        pairs.push([normalizeText(label), String(nextRowValue).trim()]);
+                    }
+                });
+            });
+            return pairs;
+        }
+
+        function findIndicator(rows, patterns) {
+            const values = collectIndicatorValues(rows);
+            for (const pattern of patterns) {
+                const found = values.find(([label]) => label.includes(normalizeText(pattern)));
+                if (found) return found[1];
+            }
+            return '—';
+        }
+
+        function validateIndicatorSheet(rows) {
+            const labels = rows.flat().map(normalizeText);
+            if (!labels.some((label) => label.includes('TOTAL DE UNIDADES'))
+                || !labels.some((label) => label.includes('EM ATRASO'))) {
+                throw new Error('A estrutura da aba de indicadores foi alterada ou não está disponível.');
+            }
+            return rows;
+        }
+
+        function hasIndicatorChanges(previousRows, nextRows) {
+            const removeTimestampRow = (rows) => (
+                normalizeText(rows[0]?.[0]).startsWith('DATA') ? rows.slice(1) : rows
+            );
+            return JSON.stringify(removeTimestampRow(previousRows)) !== JSON.stringify(removeTimestampRow(nextRows));
+        }
+
+        function renderMetrics() {
+            const motorMetrics = [...state.unitCache.values()].reduce((totals, unit) => {
+                unit.motors.forEach((motor) => {
+                    totals.total += 1;
+                    const result = calcNEMA(motor.r, motor.s, motor.t);
+                    if (result.status === 'ALERTA') totals.alerts += 1;
+                    if (result.status === 'CRÍTICO') totals.critical += 1;
+                    if (result.status === 'SEM DADOS') totals.incomplete += 1;
+                });
+                return totals;
+            }, { total: 0, alerts: 0, critical: 0, incomplete: 0 });
+            const metrics = [
+                { title: 'Equipamentos carregados', value: motorMetrics.total, icon: 'ph-engine' },
+                { title: 'Alertas identificados (>5%)', value: motorMetrics.alerts, icon: 'ph-warning', tone: 'warning' },
+                { title: 'Desequilíbrios críticos (>10%)', value: motorMetrics.critical, icon: 'ph-warning-circle', tone: 'danger' },
+                { title: 'Medições incompletas', value: motorMetrics.incomplete, icon: 'ph-question', tone: 'warning' },
+                { title: 'Total de unidades', value: findIndicator(state.indicatorRows, ['TOTAL DE UNIDADES']), icon: 'ph-buildings' },
+                { title: 'Unidades em atraso', value: findIndicator(state.indicatorRows, ['UNIDADES EM ATRASO', 'UNINDADES EM ATRASO']), icon: 'ph-warning', tone: 'warning' },
+                { title: 'Unidades em dia', value: findIndicator(state.indicatorRows, ['UNIDADES EM DIA']), icon: 'ph-check-circle', tone: 'success' },
+                { title: 'Maior atraso atual', value: findIndicator(state.indicatorRows, ['MAIOR ATRASO ATUAL']), icon: 'ph-clock', suffix: ' dias', tone: 'danger' },
+                { title: 'Média de atraso', value: findIndicator(state.indicatorRows, ['MEDIA DE ATRASO']), icon: 'ph-chart-line-up', suffix: ' dias' },
+                { title: 'Responsável com maior atraso', value: findIndicator(state.indicatorRows, ['REPONSAVEL COM MAIOR ATRASO', 'RESPONSAVEL COM MAIOR ATRASO']), icon: 'ph-user-circle' },
+                { title: 'Percentual em atraso', value: findIndicator(state.indicatorRows, ['% EM ATRASO']), icon: 'ph-percent', tone: 'warning' }
+            ];
+            const grid = $('#metrics-grid');
+            grid.replaceChildren();
+            metrics.forEach((metric) => {
+                const card = document.createElement('article');
+                card.className = 'metric-card';
+                const title = document.createElement('span');
+                title.className = 'metric-title';
+                title.textContent = metric.title;
+                const value = document.createElement('span');
+                value.className = `metric-value${String(metric.value).length > 16 ? ' compact' : ''}`;
+                value.textContent = metric.value === '—' || metric.value === '' ? '—' : `${metric.value}${metric.suffix || ''}`;
+                if (metric.tone) value.style.color = `var(--${metric.tone})`;
+                const icon = document.createElement('i');
+                icon.className = `ph-bold ${metric.icon} metric-icon`;
+                icon.setAttribute('aria-hidden', 'true');
+                card.append(title, value, icon);
+                grid.append(card);
+            });
+            const sourceDate = extractSourceTimestamp(state.indicatorRows);
+            $('#source-updated').textContent = sourceDate ? `Data informada pela planilha: ${sourceDate}` : '';
+        }
+
+        function parseUnitSummary(rows) {
+            const headerIndex = rows.findIndex((row) => {
+                const cells = row.map(normalizeText);
+                return cells.some((cell) => cell.includes('UNIDADE'))
+                    && cells.some((cell) => cell.includes('NOME'))
+                    && cells.some((cell) => cell.includes('DATA'));
+            });
+            if (headerIndex < 0) throw new Error('A estrutura da aba de unidades foi alterada ou não está disponível.');
+            const header = rows[headerIndex].map(normalizeText);
+            const columns = {
+                name: header.findIndex((cell) => cell.includes('UNIDADE')),
+                technician: header.findIndex((cell) => cell.includes('NOME')),
+                date: header.findIndex((cell) => cell.includes('DATA')),
+                delay: header.findIndex((cell) => cell.includes('ATRASO'))
+            };
+            if (Object.values(columns).some((index) => index < 0)) {
+                throw new Error('Não foi possível reconhecer todas as colunas da aba de unidades.');
+            }
+
+            const units = rows.slice(headerIndex + 1).flatMap((row) => {
+                const name = String(row[columns.name] ?? '').trim();
+                if (!name) return [];
+                const statusText = String(row[columns.delay] ?? '').trim();
+                const daysColumn = row.slice(columns.delay + 1).map(parseNumber).find((number) => number !== null);
+                const statusMatch = statusText.match(/(\d+(?:[.,]\d+)?)\s*DIAS?\s+EM\s+ATRASO/i);
+                const daysLate = daysColumn !== undefined
+                    ? daysColumn
+                    : statusMatch ? parseNumber(statusMatch[1]) : 0;
+                return [{
+                    name,
+                    technician: String(row[columns.technician] ?? '').trim(),
+                    date: String(row[columns.date] ?? '').trim(),
+                    status: statusText.trim(),
+                    daysLate: Math.max(0, daysLate || 0)
+                }];
+            });
+            if (!units.length) throw new Error('A aba de unidades não contém linhas de dados reconhecíveis.');
+            return units;
+        }
+
+        function createCell(row, value, className = '') {
+            const cell = document.createElement('td');
+            cell.textContent = value === null || value === undefined || value === '' ? '—' : String(value);
+            if (className) cell.className = className;
+            row.append(cell);
+            return cell;
+        }
+
+        function createStatusBadge(daysLate, statusText = '') {
+            const badge = document.createElement('span');
+            const overdue = daysLate > 0 || normalizeText(statusText).includes('ATRASO');
+            badge.className = `badge ${overdue ? 'badge-critico' : 'badge-normal'}`;
+            badge.textContent = overdue ? 'EM ATRASO' : 'EM DIA';
+            return badge;
+        }
+
+        function renderUnitRows() {
+            const filtered = state.unitRows.filter((unit) => {
+                const term = normalizeText($('#unit-search').value);
+                return !term || normalizeText(`${unit.name} ${unit.technician}`).includes(term);
+            });
+            ['#tb-unidades', '#tb-unidades-secondary'].forEach((selector) => {
+                const body = $(selector);
+                body.replaceChildren();
+                filtered.forEach((unit) => {
+                    const row = document.createElement('tr');
+                    createCell(row, unit.name);
+                    createCell(row, unit.technician);
+                    createCell(row, formatDate(unit.date));
+                    createCell(row, unit.daysLate ? `${unit.daysLate} dias` : '0 dias', 'numeric');
+                    const statusCell = document.createElement('td');
+                    statusCell.append(createStatusBadge(unit.daysLate, unit.status));
+                    row.append(statusCell);
+                    body.append(row);
+                });
+            });
+            const hasRows = filtered.length > 0;
+            $('#units-empty').classList.toggle('hidden', hasRows);
+            $('#tb-unidades').closest('table').classList.toggle('hidden', !hasRows);
+            $('#units-secondary-empty').classList.toggle('hidden', state.unitRows.length > 0);
+            renderOverviewChart();
+        }
+
+        function renderOverviewChart() {
+            if (typeof Chart === 'undefined') return;
+            const overdue = state.unitRows.filter((unit) => unit.daysLate > 0 || normalizeText(unit.status).includes('ATRASO')).length;
+            const onTime = Math.max(0, state.unitRows.length - overdue);
+            const canvas = $('#overview-chart');
+            const data = {
+                labels: ['Em dia', 'Em atraso'],
+                datasets: [{ data: [onTime, overdue], backgroundColor: ['#10b981', '#ef4444'], borderWidth: 0 }]
+            };
+            if (state.overviewChart) {
+                state.overviewChart.data = data;
+                state.overviewChart.update('none');
+                return;
+            }
+            state.overviewChart = new Chart(canvas.getContext('2d'), {
+                type: 'doughnut',
+                data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'right', labels: { color: chartColor('--chart-text'), font: { family: 'Plus Jakarta Sans' } } } }
+                }
+            });
+        }
+
+        function chartColor(variable) {
+            return getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
+        }
+
+        function calcNEMA(r, s, t) {
+            if ([r, s, t].some((value) => value === null || value === undefined || !Number.isFinite(value) || value <= 0)) {
+                return { avg: null, dev: null, status: 'SEM DADOS', badge: 'badge-alerta' };
+            }
+            const avg = (r + s + t) / 3;
+            const deviation = Math.max(Math.abs(r - avg), Math.abs(s - avg), Math.abs(t - avg));
+            const percent = (deviation / avg) * 100;
+            const status = percent > 10 ? 'CRÍTICO' : percent > 5 ? 'ALERTA' : 'NORMAL';
+            const badge = status === 'CRÍTICO' ? 'badge-critico' : status === 'ALERTA' ? 'badge-alerta' : 'badge-normal';
+            return { avg, dev: percent, status, badge };
+        }
+
+        function findMotorGroups(header) {
+            const normalized = header.map(normalizeText);
+            const groups = [];
+            normalized.forEach((cell, start) => {
+                if (cell !== 'CV') return;
+                const rpm = normalized.indexOf('RPM', start + 1);
+                const equipment = normalized.indexOf('EQUIPAMENTO', start + 1);
+                if (rpm < 0 || equipment < 0 || rpm > start + 2 || equipment < rpm) return;
+                const phaseR = normalized.indexOf('R', equipment + 1);
+                const phaseS = normalized.indexOf('S', equipment + 1);
+                const phaseT = normalized.indexOf('T', equipment + 1);
+                if (phaseR < equipment || phaseS <= phaseR || phaseT <= phaseS || phaseT > equipment + 5) return;
+                const kw = normalized.slice(equipment + 1, phaseR).includes('KW')
+                    ? normalized.indexOf('KW', equipment + 1)
+                    : -1;
+                groups.push({ cv: start, rpm, equipment, kw, r: phaseR, s: phaseS, t: phaseT });
+            });
+            return groups;
+        }
+
+        function parseMotorSheet(text) {
+            const rows = parseCsv(text);
+            const parsed = { motors: [], date: '', technician: '', rows: rows.length, hasHeader: false };
+            rows.slice(0, 5).forEach((row) => row.forEach((cell) => {
+                const dateMatch = String(cell).match(/\b\d{1,2}\/\d{1,2}\/\d{4}\b/);
+                if (dateMatch && !parsed.date) parsed.date = dateMatch[0];
+                const technicianMatch = String(cell).match(/TECNICO\s*:\s*(.+)/i);
+                if (technicianMatch && !parsed.technician) parsed.technician = technicianMatch[1].trim();
+            }));
+
+            rows.forEach((row, rowIndex) => {
+                const groups = findMotorGroups(row);
+                if (!groups.length) return;
+                parsed.hasHeader = true;
+                rows.slice(rowIndex + 1).forEach((dataRow) => {
+                    groups.forEach((group) => {
+                        const equipment = String(dataRow[group.equipment] ?? '').trim();
+                        if (!equipment) return;
+                        const r = parseNumber(dataRow[group.r]);
+                        const s = parseNumber(dataRow[group.s]);
+                        const t = parseNumber(dataRow[group.t]);
+                        if ([r, s, t].every((value) => value === null)) return;
+                        parsed.motors.push({
+                            equipment,
+                            cv: parseNumber(dataRow[group.cv]),
+                            rpm: parseNumber(dataRow[group.rpm]),
+                            kw: group.kw >= 0 ? parseNumber(dataRow[group.kw]) : null,
+                            r, s, t
+                        });
+                    });
+                });
+            });
+            if (text.trim() && !parsed.hasHeader) {
+                throw new Error('Os dados publicados desta unidade não contêm um cabeçalho de medições reconhecido.');
+            }
+            return parsed;
+        }
+
+        function parseUnitSheet(text, gid) {
+            if (!text.trim() && !EMPTY_UNIT_SHEETS.has(gid)) {
+                throw new Error('A aba retornou vazia; os dados anteriores foram preservados.');
+            }
+            const parsed = parseMotorSheet(text);
+            const previous = state.unitCache.get(gid);
+            if (previous?.motors.length && parsed.hasHeader && !parsed.motors.length) {
+                throw new Error('A aba não retornou equipamentos; os dados anteriores foram preservados.');
+            }
+            return parsed;
+        }
+
+        function renderMotorRows() {
+            const body = $('#tb-analytics');
+            body.replaceChildren();
+            const data = state.currentUnit;
+            const search = normalizeText($('#search-equip').value);
+            if (!data) {
+                $('#motors-empty').classList.remove('hidden');
+                $('#motors-empty').textContent = 'Selecione uma unidade para carregar os dados publicados.';
+                $('#unit-meta').textContent = '';
+                $('#export-button').disabled = true;
+                renderUnitChart([]);
+                return;
+            }
+            const visibleMotors = data.motors.filter((motor) => !search || normalizeText(motor.equipment).includes(search));
+            data.motors.forEach((motor) => {
+                if (search && !normalizeText(motor.equipment).includes(search)) return;
+                const row = document.createElement('tr');
+                createCell(row, motor.equipment);
+                createCell(row, motor.cv, 'numeric');
+                createCell(row, motor.rpm, 'numeric');
+                createCell(row, motor.kw, 'numeric');
+                createCell(row, motor.r, 'numeric');
+                createCell(row, motor.s, 'numeric');
+                createCell(row, motor.t, 'numeric');
+                const nema = calcNEMA(motor.r, motor.s, motor.t);
+                createCell(row, nema.avg === null ? '—' : `${nema.avg.toFixed(1)} A`, 'numeric');
+                createCell(row, nema.dev === null ? '—' : `${nema.dev.toFixed(1)}%`, 'numeric');
+                const statusCell = document.createElement('td');
+                const badge = document.createElement('span');
+                badge.className = `badge ${nema.badge}`;
+                badge.textContent = nema.status;
+                statusCell.append(badge);
+                row.append(statusCell);
+                body.append(row);
+            });
+            const hasMotors = visibleMotors.length > 0;
+            $('#motors-empty').classList.toggle('hidden', hasMotors);
+            if (!hasMotors) $('#motors-empty').textContent = data.motors.length ? 'Nenhum equipamento corresponde à busca.' : 'Esta aba não possui medições publicadas.';
+            const meta = [
+                data.date ? `Medição: ${formatDate(data.date)}` : '',
+                data.technician ? `Técnico: ${data.technician}` : '',
+                `${data.motors.length} equipamento(s)`
+            ].filter(Boolean);
+            $('#unit-meta').textContent = meta.join(' · ');
+            renderUnitChart(data.motors);
+        }
+
+        function renderUnitChart(motors) {
+            if (typeof Chart === 'undefined') return;
+            const data = {
+                labels: motors.map((motor) => motor.equipment),
+                datasets: [
+                    { label: 'Fase R', data: motors.map((motor) => motor.r), backgroundColor: '#3b82f6' },
+                    { label: 'Fase S', data: motors.map((motor) => motor.s), backgroundColor: '#f59e0b' },
+                    { label: 'Fase T', data: motors.map((motor) => motor.t), backgroundColor: '#ef4444' }
+                ]
+            };
+            if (state.unitChart) {
+                state.unitChart.data = data;
+                state.unitChart.update('none');
+                return;
+            }
+            state.unitChart = new Chart($('#unit-chart').getContext('2d'), {
+                type: 'bar',
+                data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { ticks: { color: chartColor('--chart-text'), maxRotation: 45, minRotation: 0 }, grid: { display: false } },
+                        y: { beginAtZero: true, ticks: { color: chartColor('--chart-text') }, grid: { color: chartColor('--chart-grid') } }
+                    },
+                    plugins: { legend: { labels: { color: chartColor('--chart-text') } } }
+                }
+            });
+        }
+
+        function updateChartTheme() {
+            const textColor = chartColor('--chart-text');
+            if (state.overviewChart) {
+                state.overviewChart.options.plugins.legend.labels.color = textColor;
+                state.overviewChart.update('none');
+            }
+            if (state.unitChart) {
+                state.unitChart.options.plugins.legend.labels.color = textColor;
+                state.unitChart.options.scales.x.ticks.color = textColor;
+                state.unitChart.options.scales.y.ticks.color = textColor;
+                state.unitChart.options.scales.y.grid.color = chartColor('--chart-grid');
+                state.unitChart.update('none');
+            }
+        }
+
+        function setView(view) {
+            state.view = view;
+            const titles = {
+                dash: ['Visão Executiva', 'Acompanhamento online de medições e confiabilidade elétrica.'],
+                analytics: ['Diagnóstico NEMA', 'Análise das correntes dos motores publicados por unidade.'],
+                unidades: ['Gestão de Unidades', 'Acompanhamento de envio e data das medições publicadas.']
+            };
+            document.querySelectorAll('[data-view]').forEach((button) => {
+                const active = button.dataset.view === view;
+                button.classList.toggle('active', active);
+                if (active) button.setAttribute('aria-current', 'page');
+                else button.removeAttribute('aria-current');
+            });
+            Object.entries({ dash: '#sec-dash', analytics: '#sec-analytics', unidades: '#sec-unidades' }).forEach(([key, selector]) => {
+                $(selector).classList.toggle('hidden', key !== view);
+            });
+            $('#view-title').textContent = titles[view][0];
+            $('#view-subtitle').textContent = titles[view][1];
+            if (view === 'analytics') loadSelectedUnit();
+            if (view === 'unidades') $('#unit-search-secondary').value = $('#unit-search').value;
+        }
+
+        async function loadSelectedUnit() {
+            const sheet = state.selectedUnit;
+            const cached = state.unitCache.get(sheet.gid);
+            state.currentUnit = cached || null;
+            renderMotorRows();
+            try {
+                const csv = await fetchSheet(sheet.gid);
+                const previous = state.unitCache.get(sheet.gid);
+                if (!previous || previous.csv !== csv) {
+                    const parsed = parseUnitSheet(csv, sheet.gid);
+                    state.unitCache.set(sheet.gid, { ...parsed, csv });
+                    renderMetrics();
+                }
+                if (state.selectedUnit.gid === sheet.gid) {
+                    state.currentUnit = state.unitCache.get(sheet.gid);
+                    renderMotorRows();
+                }
+                if (state.lastSuccess) {
+                    setSyncStatus('online', 'Dados sincronizados com a planilha publicada.');
+                }
+            } catch (error) {
+                if (state.selectedUnit.gid === sheet.gid && !state.currentUnit) {
+                    $('#motors-empty').classList.remove('hidden');
+                    $('#motors-empty').textContent = 'Não foi possível acessar esta aba agora. Tente novamente em instantes.';
+                }
+                $('#unit-data-status').textContent = state.currentUnit
+                    ? `Falha ao atualizar ${sheet.name}; os últimos dados válidos foram mantidos.`
+                    : `Não foi possível carregar ${sheet.name}. Verifique a conexão e tente novamente.`;
+                console.error(`Falha ao carregar a aba ${sheet.name}:`, error);
+            }
+        }
+
+        async function refreshData() {
+            if (state.refreshing) return;
+            state.refreshing = true;
+            const firstLoad = !state.indicatorCsv && !state.summaryCsv;
+            setSyncStatus(firstLoad ? 'loading' : 'refreshing', firstLoad ? 'Carregando dados publicados...' : 'Atualizando dados da planilha...');
+            const errors = [];
+            let successfulRequests = 0;
+            try {
+                const summaries = [
+                    { name: 'indicadores', gid: SUMMARY_SHEETS.indicators },
+                    { name: 'unidades', gid: SUMMARY_SHEETS.units }
+                ];
+                const results = await Promise.allSettled(summaries.map(({ gid }) => fetchSheet(gid)));
+                let dashboardChanged = false;
+                let unitsChanged = false;
+
+                results.forEach((result, index) => {
+                    const { name } = summaries[index];
+                    if (result.status === 'rejected') {
+                        errors.push(name);
+                        console.error(`Falha ao atualizar ${name}:`, result.reason);
+                        return;
+                    }
+                    try {
+                        const csv = result.value;
+                        if (name === 'indicadores' && state.indicatorCsv !== csv) {
+                            const rows = validateIndicatorSheet(parseCsv(csv));
+                            dashboardChanged = hasIndicatorChanges(state.indicatorRows, rows) || dashboardChanged;
+                            state.indicatorCsv = csv;
+                            state.indicatorRows = rows;
+                        } else if (name === 'unidades' && state.summaryCsv !== csv) {
+                            const units = parseUnitSummary(parseCsv(csv));
+                            state.summaryCsv = csv;
+                            state.unitRows = units;
+                            dashboardChanged = true;
+                            unitsChanged = true;
+                        }
+                        successfulRequests += 1;
+                    } catch (error) {
+                        errors.push(name);
+                        console.error(`A resposta de ${name} não contém dados válidos:`, error);
+                    }
+                });
+
+                if (dashboardChanged) renderMetrics();
+                if (unitsChanged) renderUnitRows();
+                if (state.indicatorRows.length) {
+                    const sourceDate = extractSourceTimestamp(state.indicatorRows);
+                    $('#source-updated').textContent = sourceDate ? `Data informada pela planilha: ${sourceDate}` : '';
+                }
+                $('#export-button').disabled = !(state.indicatorCsv || state.summaryCsv) || state.exporting;
+                if (successfulRequests) state.lastSuccess = new Date();
+            } catch (error) {
+                errors.push('processamento dos dados');
+                console.error('Falha inesperada durante a atualização:', error);
+            } finally {
+                state.refreshing = false;
+            }
+
+            if (errors.length) {
+                const hasCachedData = Boolean(state.indicatorCsv || state.summaryCsv || state.currentUnit || state.unitCache.size);
+                const label = hasCachedData ? 'Falha parcial; os últimos dados válidos foram mantidos.' : 'Não foi possível carregar os dados da planilha.';
+                setSyncStatus('error', label, `Verifique se o computador está conectado à internet e tente abrir este arquivo no Chrome ou Edge atualizados. Não foi possível atualizar: ${errors.join(', ')}. A próxima tentativa automática ocorrerá em até 30 segundos.`);
+            } else if (!successfulRequests) {
+                setSyncStatus('error', 'Não foi possível carregar os dados da planilha.', 'Nenhuma aba retornou dados válidos. A próxima tentativa automática ocorrerá em até 30 segundos.');
+            } else {
+                setSyncStatus('online', 'Dados sincronizados com a planilha publicada.');
+            }
+            refreshUnitSheets();
+        }
+
+        async function refreshUnitSheets() {
+            if (state.refreshingUnits) return;
+            state.refreshingUnits = true;
+            $('#unit-data-status').textContent = `Carregando medições das ${UNIT_SHEETS.length} unidades...`;
+            let loadedUnits = 0;
+            const failedUnits = [];
+
+            try {
+                await fetchBatch(UNIT_SHEETS, 4, (index, result) => {
+                    const sheet = UNIT_SHEETS[index];
+                    if (result.status === 'rejected') {
+                        failedUnits.push(sheet.name);
+                        console.error(`Falha ao atualizar a aba ${sheet.name}:`, result.reason);
+                        $('#unit-data-status').textContent = `Carregando medições: ${loadedUnits + failedUnits.length} de ${UNIT_SHEETS.length} unidades...`;
+                        return;
+                    }
+                    try {
+                        const csv = result.value;
+                        const previous = state.unitCache.get(sheet.gid);
+                        let unitChanged = false;
+                        if (!previous || previous.csv !== csv) {
+                            const parsed = parseUnitSheet(csv, sheet.gid);
+                            state.unitCache.set(sheet.gid, { ...parsed, csv });
+                            unitChanged = true;
+                        }
+                        loadedUnits += 1;
+                        if (unitChanged) renderMetrics();
+                        if (state.view === 'analytics' && state.selectedUnit.gid === sheet.gid) {
+                            state.currentUnit = state.unitCache.get(sheet.gid) || null;
+                            renderMotorRows();
+                        }
+                    } catch (error) {
+                        failedUnits.push(sheet.name);
+                        console.error(`Os dados da aba ${sheet.name} são inválidos:`, error);
+                    }
+                    $('#unit-data-status').textContent = `Carregando medições: ${loadedUnits + failedUnits.length} de ${UNIT_SHEETS.length} unidades...`;
+                });
+
+                if (state.view === 'analytics') {
+                    state.currentUnit = state.unitCache.get(state.selectedUnit.gid) || null;
+                    renderMotorRows();
+                }
+                if (failedUnits.length) {
+                    $('#unit-data-status').textContent = `Medições carregadas: ${loadedUnits} de ${UNIT_SHEETS.length}. Não foi possível ler: ${failedUnits.join(', ')}. Os dados válidos foram mantidos.`;
+                } else {
+                    $('#unit-data-status').textContent = `${loadedUnits} unidades sincronizadas.`;
+                }
+            } catch (error) {
+                $('#unit-data-status').textContent = state.unitCache.size
+                    ? `Falha ao atualizar as medições. Os dados válidos das ${state.unitCache.size} unidades já carregadas foram mantidos.`
+                    : 'Não foi possível carregar as medições. Verifique a conexão com a internet.';
+                console.error('Falha inesperada ao atualizar as medições:', error);
+            } finally {
+                state.refreshingUnits = false;
+            }
+        }
+
+        function csvCell(value) {
+            let text = String(value ?? '');
+            if (typeof value === 'string' && /^[\s]*[=+\-@]/.test(text)) text = `'${text}`;
+            return `"${text.replace(/"/g, '""')}"`;
+        }
+
+        async function exportDataCSV() {
+            if (state.exporting) return;
+            state.exporting = true;
+            const exportButton = $('#export-button');
+            exportButton.disabled = true;
+            try {
+                const results = await fetchBatch(UNIT_SHEETS);
+                const failures = results.flatMap((result, index) => (
+                    result.status === 'rejected' ? [UNIT_SHEETS[index].name] : []
+                ));
+                if (failures.length) {
+                    throw new Error(`Não foi possível ler as abas: ${failures.join(', ')}.`);
+                }
+                const exportedUnits = results.map((result, index) => {
+                    const sheet = UNIT_SHEETS[index];
+                    const csv = result.value;
+                    const parsed = { ...parseUnitSheet(csv, sheet.gid), csv };
+                    state.unitCache.set(sheet.gid, parsed);
+                    return { sheet, data: parsed };
+                });
+                const motors = exportedUnits.flatMap(({ sheet, data }) => data.motors.map((motor) => ({ sheet, data, motor })));
+                if (!motors.length) throw new Error('A planilha não retornou equipamentos para exportação.');
+                renderMetrics();
+                const header = ['Unidade', 'Data', 'Técnico', 'Equipamento', 'CV', 'RPM', 'kW', 'Fase R', 'Fase S', 'Fase T', 'Média (A)', 'Desequilíbrio (%)', 'Status NEMA'];
+                const rows = motors.map(({ sheet, data, motor }) => {
+                    const nema = calcNEMA(motor.r, motor.s, motor.t);
+                    return [
+                        sheet.name, data.date, data.technician, motor.equipment,
+                        motor.cv, motor.rpm, motor.kw, motor.r, motor.s, motor.t,
+                        nema.avg === null ? '' : nema.avg.toFixed(1),
+                        nema.dev === null ? '' : nema.dev.toFixed(1),
+                        nema.status
+                    ];
+                });
+                const csv = [header, ...rows].map((row) => row.map(csvCell).join(';')).join('\r\n');
+                const url = URL.createObjectURL(new Blob(['\uFEFF', csv], { type: 'text/csv;charset=utf-8' }));
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `SistemX_Relatorio_NEMA_${new Date().toISOString().slice(0, 10)}.csv`;
+                link.click();
+                window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+                if (state.view === 'analytics') {
+                    state.currentUnit = state.unitCache.get(state.selectedUnit.gid) || null;
+                    renderMotorRows();
+                }
+            } catch (error) {
+                console.error('Falha ao exportar os dados da planilha:', error);
+                setSyncStatus('error', 'Não foi possível concluir a exportação.', `${error.message} Os dados exibidos permanecem disponíveis.`);
+            } finally {
+                state.exporting = false;
+                exportButton.disabled = !(state.indicatorCsv || state.summaryCsv);
+            }
+        }
+
+        function toggleTheme() {
+            const root = document.documentElement;
+            const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+            root.dataset.theme = next;
+            $('#theme-button').setAttribute('aria-pressed', String(next === 'light'));
+            $('#theme-icon').className = `ph-bold ${next === 'dark' ? 'ph-moon-stars' : 'ph-sun'}`;
+            updateChartTheme();
+        }
+
+        function initialize() {
+            $('#sel-unidade').replaceChildren(...UNIT_SHEETS.map((sheet) => {
+                const option = document.createElement('option');
+                option.value = sheet.gid;
+                option.textContent = sheet.name;
+                return option;
+            }));
+            $('#sel-unidade').value = state.selectedUnit.gid;
+            document.querySelectorAll('[data-view]').forEach((button) => button.addEventListener('click', () => setView(button.dataset.view)));
+            $('#refresh-button').addEventListener('click', refreshData);
+            $('#theme-button').addEventListener('click', toggleTheme);
+            $('#export-button').addEventListener('click', exportDataCSV);
+            $('#sel-unidade').addEventListener('change', () => {
+                state.selectedUnit = UNIT_SHEETS.find((sheet) => sheet.gid === $('#sel-unidade').value) || UNIT_SHEETS[0];
+                state.currentUnit = state.unitCache.get(state.selectedUnit.gid) || null;
+                $('#motors-empty').classList.add('hidden');
+                loadSelectedUnit();
+            });
+            $('#search-equip').addEventListener('input', renderMotorRows);
+            $('#unit-search').addEventListener('input', () => {
+                $('#unit-search-secondary').value = $('#unit-search').value;
+                renderUnitRows();
+            });
+            $('#unit-search-secondary').addEventListener('input', () => {
+                $('#unit-search').value = $('#unit-search-secondary').value;
+                renderUnitRows();
+            });
+
+            setSyncStatus('loading', 'Carregando dados publicados...');
+            renderUnitRows();
+            refreshData();
+            state.refreshTimer = window.setInterval(refreshData, REFRESH_INTERVAL);
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible' && state.lastSuccess && Date.now() - state.lastSuccess.getTime() >= REFRESH_INTERVAL) {
+                    refreshData();
+                }
+            });
+            window.addEventListener('pagehide', (event) => {
+                if (event.persisted) return;
+                if (state.refreshTimer !== null) {
+                    window.clearInterval(state.refreshTimer);
+                    state.refreshTimer = null;
+                }
+                state.overviewChart?.destroy();
+                state.unitChart?.destroy();
+                state.overviewChart = null;
+                state.unitChart = null;
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', initialize, { once: true });
+    </script>
+</body>
+</html>

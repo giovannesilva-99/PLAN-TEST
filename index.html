@@ -9,8 +9,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://unpkg.com" crossorigin>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script defer src="https://unpkg.com/@phosphor-icons/web@2.1.1" integrity="sha384-cPFV+/abYd3INVFHPmSKpBmcnH+Q+bTZW7dv/EiuShUNPkHyFmRF8PsL7Ibfvunk" crossorigin="anonymous"></script>
+    <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js" integrity="sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ" crossorigin="anonymous"></script>
     <style>
         :root[data-theme="dark"] {
@@ -211,6 +213,38 @@
         .chart-box.compact { height: 260px; }
         .empty-state { padding: 24px 12px; color: var(--text-muted); text-align: center; font-size: .9rem; line-height: 1.6; }
         .unit-meta { min-height: 20px; color: var(--text-muted); font-size: .82rem; }
+        .map-screen { min-width: 0; min-height: 0; }
+        .map-workspace { min-height: 520px; height: clamp(520px, calc(100dvh - 220px), 780px); display: grid; grid-template-columns: minmax(290px, 350px) minmax(0, 1fr); overflow: hidden; border: 1px solid var(--border); border-radius: 18px; background: var(--bg-card); }
+        .map-sidebar { min-height: 0; display: flex; flex-direction: column; gap: 16px; overflow: hidden; padding: 18px; border-right: 1px solid var(--border); }
+        .map-sidebar h2 { margin: 0; font-size: 1rem; }
+        .map-description, .map-hint, .map-attribution { margin: 0; color: var(--text-muted); font-size: .76rem; line-height: 1.5; }
+        .map-origin-form { display: flex; gap: 7px; }
+        .map-origin-form .filter-control { width: 100%; min-width: 0; }
+        .map-origin-form .btn { flex: 0 0 auto; padding-right: 11px; padding-left: 11px; }
+        .map-origin-status { min-height: 18px; margin: -9px 0 0; color: var(--text-muted); font-size: .75rem; line-height: 1.4; }
+        .map-origin-status[data-state="error"] { color: var(--danger); }
+        .map-origin-status[data-state="success"] { color: var(--success); }
+        .map-filter-group { display: flex; flex-wrap: wrap; gap: 6px; }
+        .map-filter { min-height: 34px; padding: 7px 10px; border: 1px solid var(--border); border-radius: 9px; background: transparent; color: var(--text-muted); font-size: .74rem; font-weight: 700; cursor: pointer; }
+        .map-filter:hover { background: var(--bg-card-hover); color: var(--text-main); }
+        .map-filter[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-glow); color: var(--accent); }
+        .map-list-heading { display: flex; justify-content: space-between; gap: 8px; color: var(--text-muted); font-size: .77rem; font-weight: 700; }
+        .map-unit-count { color: var(--text-sub); font-variant-numeric: tabular-nums; }
+        .map-unit-list { min-height: 0; flex: 1; display: grid; align-content: start; gap: 8px; overflow-y: auto; padding-right: 3px; }
+        .map-unit-item { width: 100%; display: grid; grid-template-columns: 10px minmax(0, 1fr); gap: 10px; padding: 11px; border: 1px solid var(--border); border-radius: 11px; background: var(--bg-body); color: var(--text-main); text-align: left; cursor: pointer; }
+        .map-unit-item:hover, .map-unit-item[aria-current="true"] { border-color: var(--accent); background: var(--bg-card-hover); }
+        .map-unit-dot { width: 10px; height: 10px; margin-top: 4px; border-radius: 50%; }
+        .map-unit-copy { min-width: 0; display: grid; gap: 4px; }
+        .map-unit-name { font-size: .78rem; font-weight: 700; line-height: 1.35; }
+        .map-unit-address, .map-unit-materials { color: var(--text-muted); font-size: .71rem; line-height: 1.4; }
+        .map-unit-distance { color: var(--accent); font-size: .73rem; font-weight: 700; }
+        .map-empty { padding: 18px 8px; color: var(--text-muted); text-align: center; font-size: .8rem; line-height: 1.5; }
+        .map-canvas { min-width: 0; min-height: 0; background: #dbe5e8; }
+        .map-canvas .leaflet-popup-content-wrapper, .map-canvas .leaflet-popup-tip { background: var(--bg-card); color: var(--text-main); }
+        .map-popup { max-width: 260px; display: grid; gap: 6px; font-family: "Plus Jakarta Sans", sans-serif; font-size: .78rem; line-height: 1.45; }
+        .map-popup strong { font-size: .84rem; }
+        .map-popup span { color: var(--text-muted); }
+        .map-origin-marker { width: 18px; height: 18px; border: 3px solid #fff; border-radius: 50%; background: #2563eb; box-shadow: 0 0 0 5px rgba(37, 99, 235, .25); }
         .hidden { display: none !important; }
         .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; clip-path: inset(50%); }
 
@@ -248,6 +282,10 @@
             .filters > * { min-width: 0; flex: 1 1 145px; }
             .chart-box { height: 250px; }
             th, td { padding: 10px 9px; }
+            .map-workspace { height: auto; min-height: 0; grid-template-columns: minmax(0, 1fr); }
+            .map-sidebar { max-height: none; overflow: visible; border-right: 0; border-bottom: 1px solid var(--border); }
+            .map-unit-list { max-height: 340px; }
+            .map-canvas { height: 56vh; min-height: 360px; }
         }
         @media (max-width: 380px) {
             .main { padding-right: 10px; padding-left: 10px; }
@@ -276,6 +314,9 @@
                 </button>
                 <button class="nav-item" type="button" data-view="unidades">
                     <i class="ph-bold ph-buildings" aria-hidden="true"></i> Gestão de Unidades
+                </button>
+                <button class="nav-item" type="button" data-view="mapa">
+                    <i class="ph-bold ph-map-trifold" aria-hidden="true"></i> Mapa de Mineração
                 </button>
             </nav>
         </div>
@@ -394,9 +435,68 @@
                 </div>
             </section>
         </section>
+
+        <section id="sec-mapa" class="map-screen hidden" aria-labelledby="mining-map-title">
+            <div class="map-workspace">
+                <aside class="map-sidebar" aria-label="Filtros e unidades de mineração">
+                    <h2 id="mining-map-title">Unidades de mineração</h2>
+                    <p class="map-description">Explore as operações de areia e pedra do grupo e compare a distância em linha reta a partir de uma origem.</p>
+                    <form class="map-origin-form" id="map-origin-form">
+                        <label class="sr-only" for="map-origin-input">CEP ou endereço de origem</label>
+                        <input class="filter-control" id="map-origin-input" type="search" placeholder="Digite CEP ou endereço" autocomplete="street-address">
+                        <button class="btn btn-primary" type="submit" aria-label="Buscar endereço">Buscar</button>
+                    </form>
+                    <button class="btn" id="map-geolocation" type="button">Usar minha localização</button>
+                    <p class="map-origin-status" id="map-origin-status" role="status" aria-live="polite">Você também pode clicar diretamente no mapa para definir a origem.</p>
+                    <div class="map-filter-group" role="group" aria-label="Filtrar por material">
+                        <button class="map-filter" type="button" data-map-filter="todos" aria-pressed="true">Todos</button>
+                        <button class="map-filter" type="button" data-map-filter="areia" aria-pressed="false">Apenas Areia</button>
+                        <button class="map-filter" type="button" data-map-filter="pedra" aria-pressed="false">Apenas Pedra</button>
+                        <button class="map-filter" type="button" data-map-filter="misto" aria-pressed="false">Atividades Mistas</button>
+                    </div>
+                    <div class="map-list-heading"><span>Unidades</span><span class="map-unit-count" id="map-unit-count"></span></div>
+                    <div class="map-unit-list" id="map-unit-list" aria-label="Lista de unidades"></div>
+                    <p class="map-attribution">Distâncias aproximadas em linha reta. Geocodificação: © OpenStreetMap contributors.</p>
+                </aside>
+                <div class="map-canvas" id="mining-map" role="region" aria-label="Mapa interativo das unidades de mineração"></div>
+            </div>
+        </section>
     </main>
 
     <script>
+        const unidadesMineracao = [
+            { nome: "Concrebase Serviços de Concretagem Ltda.", endereco: "Rodovia Marechal Rondon, s/nº, KM 212, Agua Fria, Bofete/SP", lat: -22.9985, lng: -48.1882, tipo: "areia", materiais: ["Areia Extração", "Areia Comercial"] },
+            { nome: "Concrebase Serviços de Concretagem Ltda.", endereco: "Rodovia Antonio Romano Schincariol, s/nº, KM 21, Ponte Preta, Tatuí/SP", lat: -23.3556, lng: -47.8569, tipo: "areia", materiais: ["Areia Extração", "Areia Comercial"] },
+            { nome: "Edena Maria Pechio Sasaki - EPP", endereco: "Rodovia Santos Dumont (SP-75), s/nº, km 46,4, Bairro Chácara Halter, Salto/SP", lat: -23.2125, lng: -47.2891, tipo: "areia", materiais: ["Areia Extração", "Areia Comercial"] },
+            { nome: "Edena Maria Pechio Sasaki - EPP", endereco: "Sítio São Simão, Bairro Buru/Cardeal, Elias Fausto/SP", lat: -23.0531, lng: -47.3752, tipo: "areia", materiais: ["Areia Extração"] },
+            { nome: "Mineradora Curumim Ltda", endereco: "Sítio Taperão, s/nº, Bairro São Bernardo, Rafard/SP", lat: -23.0118, lng: -47.5283, tipo: "areia", materiais: ["Areia Natural"] },
+            { nome: "Mineradora Curumim Ltda", endereco: "Rodovia Marechal Rondon, s/nº, KM 226,2, Capuava, Anhembi/SP", lat: -22.7889, lng: -48.1312, tipo: "areia", materiais: ["Areia Natural"] },
+            { nome: "Minermix Mineração Ltda.", endereco: "Sítio do Vau, s/nº, Água Fria, Anhembi/SP", lat: -22.7950, lng: -48.1250, tipo: "areia", materiais: ["Areia Natural", "Agregados de Areia"] },
+            { nome: "Minermix Mineração Ltda.", endereco: "Fazenda Bom Jardim, Bairro Bom Jardim, Capivari/SP", lat: -22.9972, lng: -47.5081, tipo: "areia", materiais: ["Areia Natural"] },
+            { nome: "Minermix Mineração Ltda.", endereco: "Rua Varzea do Rio Capivari, s/nº, Jardim Santa Isabel, Monte Mor/SP", lat: -22.9461, lng: -47.3111, tipo: "areia", materiais: ["Areia Comercial"] },
+            { nome: "Sandmix Mineração Ltda.", endereco: "Rodovia Santos Dumont (SP 75), Km 46,4 (Bloco A), Bairro Olaria, Salto/SP", lat: -23.2120, lng: -47.2890, tipo: "areia", materiais: ["Areia Industrial", "Areia Lavada"] },
+            { nome: "Sandmix Mineração Ltda.", endereco: "Est. Pedra Branca, s/nº, Bairro Pedregulho, Salto/SP", lat: -23.2315, lng: -47.3012, tipo: "areia", materiais: ["Areia Lavada"] },
+            { nome: "Sandmix Mineração Ltda.", endereco: "Sítio Santo Antonio, s/nº, Bairro do Retiro, Boituva/SP", lat: -23.2841, lng: -47.6789, tipo: "areia", materiais: ["Areia Lavada"] },
+            { nome: "Sandmix Mineração Ltda.", endereco: "Av. Geraldo Antonio Andrade, s/nº, Bairro Várzea, Iperó/SP", lat: -23.3512, lng: -47.6890, tipo: "areia", materiais: ["Areia Lavada"] },
+            { nome: "Sandmix Mineração Ltda.", endereco: "Rod. Antonio Romano Schincariol, s/nº, km 21, Ponte Preta, Tatuí/SP", lat: -23.3550, lng: -47.8560, tipo: "areia", materiais: ["Areia Lavada"] },
+            { nome: "Concrebase Serviços de Concretagem Ltda.", endereco: "Estrada Municipal Porto Feliz-Boituva, s/nº, Fazenda Jupira, Porto Feliz/SP", lat: -23.2145, lng: -47.5230, tipo: "pedra", materiais: ["Pedra Britada", "Pedrisco", "Agregados"] },
+            { nome: "Concrebase Serviços de Concretagem Ltda.", endereco: "Estrada Rural Fazenda São João, s/nº, Zona Rural, Elias Fausto/SP", lat: -23.0510, lng: -47.3710, tipo: "pedra", materiais: ["Pedra Britada", "Rachão"] },
+            { nome: "Concrebase Serviços de Concretagem Ltda.", endereco: "Rodovia Vicente Palma, s/nº, KM 2, Avecuia do Alto, Porto Feliz/SP", lat: -23.2210, lng: -47.5180, tipo: "pedra", materiais: ["Pedra Britada", "Brita 1", "Brita 2"] },
+            { nome: "Concrebase Serviços de Concretagem Ltda.", endereco: "Rod. João Guimarães, s/nº, KM 9,5, Bairro Itupava, Salto de Pirapora/SP", lat: -23.6480, lng: -47.5710, tipo: "pedra", materiais: ["Pedra Britada", "Pedrisco", "Rachão"] },
+            { nome: "Concrebase Serviços de Concretagem Ltda.", endereco: "Rodovia SP 306, Luiz Ometto, nº 26300, Santa Barbara D'Oeste/SP", lat: -22.7540, lng: -47.4120, tipo: "pedra", materiais: ["Basalto", "Pedra Britada"] },
+            { nome: "Concrebase Serviços de Concretagem Ltda.", endereco: "Estrada Municipal Carlos Tomazela, nº 3020, Bairro do Cascalho, Cordeirópolis/SP", lat: -22.4812, lng: -47.4520, tipo: "pedra", materiais: ["Pedra Britada", "Materiais de Construção"] },
+            { nome: "Engepac Britagem e Comercio de Pedras Ltda", endereco: "Rod. SP 191, s/nº, KM 77,4, Bairro Batovi, Rio Claro/SP", lat: -22.4110, lng: -47.5610, tipo: "pedra", materiais: ["Pedra Britada", "Brita Graduada", "Pedrisco"] },
+            { nome: "Extrabase Mineração Ltda.", endereco: "Estrada Municipal Pedra Branca, s/nº, KM 1, Bairro Pedregulho, Salto/SP", lat: -23.2320, lng: -47.3010, tipo: "pedra", materiais: ["Pedra Britada", "Pedrisco", "Cascalho"] },
+            { nome: "Mineração Água Bonita Ltda.", endereco: "Fazenda Água Bonita, s/nº, Bairro Barro Preto, Corumbataí/SP", lat: -22.2180, lng: -47.6250, tipo: "pedra", materiais: ["Pedra Britada", "Areia"] },
+            { nome: "Pedreira Pedroso Ltda.", endereco: "Rod. Dr. Antonio Pires de Almeida, s/nº, Km 24, Colonia Rodrigo Silva, Porto Feliz/SP", lat: -23.2100, lng: -47.5300, tipo: "pedra", materiais: ["Pedra Britada", "Brita 1", "Brita 2"] },
+            { nome: "Sandmix Mineração Ltda.", endereco: "Estrada Municipal LIM-367, s/nº, Bairro dos Paulas, Limeira/SP", lat: -22.5650, lng: -47.4010, tipo: "pedra", materiais: ["Pedra Britada", "Pedrisco"] },
+            { nome: "Saramix Mineração Ltda", endereco: "Rod. Santos Dumont (SP 75), s/nº, KM 46,4, Bloco D, Salto/SP", lat: -23.2122, lng: -47.2892, tipo: "pedra", materiais: ["Pedra Britada", "Areia"] },
+            { nome: "Concrebase Serviços de Concretagem Ltda.", endereco: "Rodovia Marechal Rondon, s/nº, km 212, Bairro Água Fria, Bofete/SP", lat: -22.9980, lng: -48.1880, tipo: "misto", materiais: ["Areia Lavada", "Pedra Britada", "Cascalho/Pedregulho"] },
+            { nome: "Concrebase Serviços de Concretagem Ltda.", endereco: "Fazenda Água Bonita, s/nº, Barro Preto, Corumbataí/SP", lat: -22.2185, lng: -47.6255, tipo: "misto", materiais: ["Areia Lavada", "Pedra Britada", "Cascalho"] },
+            { nome: "Concrebase Serviços de Concretagem Ltda.", endereco: "Rodovia SP 191, s/nº, Bairro Batovi, Rio Claro/SP", lat: -22.4115, lng: -47.5615, tipo: "misto", materiais: ["Pedra Britada", "Areia", "Materiais de Construção"] }
+        ];
+        const MAP_COLORS = { areia: '#f59e0b', pedra: '#64748b', misto: '#10b981' };
+        const MAP_LABELS = { areia: 'Areia', pedra: 'Pedra / Mineração', misto: 'Atividades mistas' };
         const SPREADSHEET_ID = '2PACX-1vQwuDz1bwGUXs15qQOuHpELezV5lsASiYTZOp9luWH7CDLUIX3f3drh253oQi7-UjwTiYJ2gitjdsKH';
         const PUBLISHED_URL = `https://docs.google.com/spreadsheets/d/e/${SPREADSHEET_ID}/pub`;
         const REFRESH_INTERVAL = 30_000;
@@ -439,6 +539,12 @@
             lastSuccess: null,
             overviewChart: null,
             unitChart: null,
+            miningMap: null,
+            mapMarkers: [],
+            mapFilter: 'todos',
+            mapOrigin: null,
+            mapOriginMarker: null,
+            selectedMiningUnit: null,
             refreshTimer: null
         };
 
@@ -962,7 +1068,8 @@
             const titles = {
                 dash: ['Visão Executiva', 'Acompanhamento online de medições e confiabilidade elétrica.'],
                 analytics: ['Diagnóstico NEMA', 'Análise das correntes dos motores publicados por unidade.'],
-                unidades: ['Gestão de Unidades', 'Acompanhamento de envio e data das medições publicadas.']
+                unidades: ['Gestão de Unidades', 'Acompanhamento de envio e data das medições publicadas.'],
+                mapa: ['Mapa de Mineração', 'Localização das unidades de areia e pedra do grupo.']
             };
             document.querySelectorAll('[data-view]').forEach((button) => {
                 const active = button.dataset.view === view;
@@ -970,13 +1077,223 @@
                 if (active) button.setAttribute('aria-current', 'page');
                 else button.removeAttribute('aria-current');
             });
-            Object.entries({ dash: '#sec-dash', analytics: '#sec-analytics', unidades: '#sec-unidades' }).forEach(([key, selector]) => {
+            Object.entries({ dash: '#sec-dash', analytics: '#sec-analytics', unidades: '#sec-unidades', mapa: '#sec-mapa' }).forEach(([key, selector]) => {
                 $(selector).classList.toggle('hidden', key !== view);
             });
             $('#view-title').textContent = titles[view][0];
             $('#view-subtitle').textContent = titles[view][1];
             if (view === 'analytics') loadSelectedUnit();
             if (view === 'unidades') $('#unit-search-secondary').value = $('#unit-search').value;
+            if (view === 'mapa') initializeMiningMap();
+        }
+
+        function distanceInKm(origin, destination) {
+            const radians = (degrees) => degrees * Math.PI / 180;
+            const latitudeDelta = radians(destination.lat - origin.lat);
+            const longitudeDelta = radians(destination.lng - origin.lng);
+            const a = Math.sin(latitudeDelta / 2) ** 2
+                + Math.cos(radians(origin.lat)) * Math.cos(radians(destination.lat)) * Math.sin(longitudeDelta / 2) ** 2;
+            return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        }
+
+        function createMiningPopup(unit) {
+            const popup = document.createElement('div');
+            popup.className = 'map-popup';
+            const name = document.createElement('strong');
+            name.textContent = unit.nome;
+            const address = document.createElement('span');
+            address.textContent = unit.endereco;
+            const type = document.createElement('span');
+            type.textContent = MAP_LABELS[unit.tipo];
+            const materials = document.createElement('span');
+            materials.textContent = `Materiais: ${unit.materiais.join(', ')}`;
+            popup.append(name, address, type, materials);
+            return popup;
+        }
+
+        function setMiningOrigin(origin, label) {
+            state.mapOrigin = origin;
+            if (state.miningMap) {
+                if (state.mapOriginMarker) state.mapOriginMarker.remove();
+                state.mapOriginMarker = L.marker([origin.lat, origin.lng], {
+                    icon: L.divIcon({ className: '', html: '<span class="map-origin-marker"></span>', iconSize: [18, 18], iconAnchor: [9, 9] }),
+                    title: 'Sua origem'
+                }).addTo(state.miningMap).bindPopup('Ponto de origem');
+            }
+            $('#map-origin-status').dataset.state = 'success';
+            $('#map-origin-status').textContent = `Origem definida: ${label}. Distâncias em linha reta.`;
+            renderMiningUnits();
+        }
+
+        function selectMiningUnit(index) {
+            const unit = unidadesMineracao[index];
+            const marker = state.mapMarkers[index];
+            state.selectedMiningUnit = index;
+            state.miningMap.setView([unit.lat, unit.lng], Math.max(state.miningMap.getZoom(), 10));
+            marker.openPopup();
+            renderMiningUnits();
+        }
+
+        function renderMiningUnits() {
+            if (!state.miningMap) return;
+            const visibleUnits = unidadesMineracao
+                .map((unit, index) => ({ unit, index, distance: state.mapOrigin ? distanceInKm(state.mapOrigin, unit) : null }))
+                .filter(({ unit }) => state.mapFilter === 'todos' || unit.tipo === state.mapFilter)
+                .sort((a, b) => {
+                    if (a.distance === null) return a.index - b.index;
+                    return a.distance - b.distance;
+                });
+            const list = $('#map-unit-list');
+            list.replaceChildren();
+            $('#map-unit-count').textContent = `${visibleUnits.length} de ${unidadesMineracao.length}`;
+            state.mapMarkers.forEach((marker, index) => {
+                if (state.mapFilter === 'todos' || unidadesMineracao[index].tipo === state.mapFilter) marker.addTo(state.miningMap);
+                else marker.remove();
+            });
+            visibleUnits.forEach(({ unit, index, distance }) => {
+                const item = document.createElement('button');
+                item.type = 'button';
+                item.className = 'map-unit-item';
+                item.setAttribute('aria-current', String(index === state.selectedMiningUnit));
+                item.addEventListener('click', () => selectMiningUnit(index));
+                const dot = document.createElement('span');
+                dot.className = 'map-unit-dot';
+                dot.style.backgroundColor = MAP_COLORS[unit.tipo];
+                const copy = document.createElement('span');
+                copy.className = 'map-unit-copy';
+                const name = document.createElement('span');
+                name.className = 'map-unit-name';
+                name.textContent = unit.nome;
+                const address = document.createElement('span');
+                address.className = 'map-unit-address';
+                address.textContent = unit.endereco;
+                const materials = document.createElement('span');
+                materials.className = 'map-unit-materials';
+                materials.textContent = `${MAP_LABELS[unit.tipo]} · ${unit.materiais.join(', ')}`;
+                copy.append(name, address, materials);
+                if (distance !== null) {
+                    const distanceLabel = document.createElement('span');
+                    distanceLabel.className = 'map-unit-distance';
+                    distanceLabel.textContent = `${distance.toFixed(1).replace('.', ',')} km`;
+                    copy.append(distanceLabel);
+                }
+                item.append(dot, copy);
+                list.append(item);
+            });
+            if (!visibleUnits.length) {
+                const empty = document.createElement('p');
+                empty.className = 'map-empty';
+                empty.textContent = 'Nenhuma unidade encontrada para este filtro.';
+                list.append(empty);
+            }
+        }
+
+        function initializeMiningMap() {
+            if (typeof L === 'undefined') {
+                $('#map-origin-status').dataset.state = 'error';
+                $('#map-origin-status').textContent = 'Não foi possível carregar o Leaflet. Verifique sua conexão e atualize a página.';
+                console.error('Leaflet não foi carregado; o mapa de mineração não pode ser inicializado.');
+                return;
+            }
+            if (state.miningMap) {
+                state.miningMap.invalidateSize();
+                return;
+            }
+            state.miningMap = L.map('mining-map').setView([-22.82, -47.52], 8);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>'
+            }).addTo(state.miningMap);
+            state.mapMarkers = unidadesMineracao.map((unit, index) => {
+                const marker = L.circleMarker([unit.lat, unit.lng], {
+                    radius: 8,
+                    color: '#ffffff',
+                    weight: 2,
+                    fillColor: MAP_COLORS[unit.tipo],
+                    fillOpacity: 0.95
+                }).bindPopup(createMiningPopup(unit));
+                marker.on('click', () => {
+                    state.selectedMiningUnit = index;
+                    renderMiningUnits();
+                });
+                return marker;
+            });
+            state.miningMap.on('click', (event) => {
+                const { lat, lng } = event.latlng;
+                $('#map-origin-input').value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+                setMiningOrigin({ lat, lng }, 'ponto selecionado no mapa');
+            });
+            renderMiningUnits();
+            window.setTimeout(() => state.miningMap?.invalidateSize(), 0);
+        }
+
+        async function searchMiningOrigin(event) {
+            event.preventDefault();
+            const query = $('#map-origin-input').value.trim();
+            const status = $('#map-origin-status');
+            if (!query) {
+                status.dataset.state = 'error';
+                status.textContent = 'Digite um CEP ou endereço para buscar.';
+                return;
+            }
+            const submitButton = $('#map-origin-form button[type="submit"]');
+            submitButton.disabled = true;
+            status.dataset.state = '';
+            status.textContent = 'Buscando endereço no OpenStreetMap...';
+            try {
+                const params = new URLSearchParams({ format: 'jsonv2', limit: '1', q: query });
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?${params}`);
+                if (!response.ok) throw new Error(`Serviço de endereços indisponível (HTTP ${response.status}).`);
+                const results = await response.json();
+                if (!results.length) throw new Error('Endereço não localizado. Tente informar também a cidade e o estado.');
+                const result = results[0];
+                const origin = { lat: Number(result.lat), lng: Number(result.lon) };
+                if (!Number.isFinite(origin.lat) || !Number.isFinite(origin.lng)) throw new Error('O serviço retornou coordenadas inválidas.');
+                $('#map-origin-input').value = result.display_name;
+                setMiningOrigin(origin, result.display_name);
+                state.miningMap.setView([origin.lat, origin.lng], 10);
+            } catch (error) {
+                status.dataset.state = 'error';
+                status.textContent = error.message || 'Não foi possível localizar este endereço.';
+                console.error('Falha ao buscar a origem no OpenStreetMap:', error);
+            } finally {
+                submitButton.disabled = false;
+            }
+        }
+
+        function useCurrentLocation() {
+            const status = $('#map-origin-status');
+            if (!navigator.geolocation) {
+                status.dataset.state = 'error';
+                status.textContent = 'A geolocalização não é compatível com este navegador.';
+                return;
+            }
+            status.dataset.state = '';
+            status.textContent = 'Obtendo sua localização...';
+            navigator.geolocation.getCurrentPosition(({ coords }) => {
+                const origin = { lat: coords.latitude, lng: coords.longitude };
+                $('#map-origin-input').value = `${origin.lat.toFixed(5)}, ${origin.lng.toFixed(5)}`;
+                setMiningOrigin(origin, 'sua localização');
+                state.miningMap.setView([origin.lat, origin.lng], 10);
+            }, (error) => {
+                status.dataset.state = 'error';
+                status.textContent = error.code === error.PERMISSION_DENIED
+                    ? 'Permissão de localização negada. Digite um endereço ou selecione o mapa.'
+                    : 'Não foi possível obter sua localização. Tente definir a origem no mapa.';
+                console.error('Falha ao obter a localização do usuário:', error);
+            }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 });
+        }
+
+        function setMiningFilter(filter) {
+            state.mapFilter = filter;
+            document.querySelectorAll('[data-map-filter]').forEach((button) => {
+                button.setAttribute('aria-pressed', String(button.dataset.mapFilter === filter));
+            });
+            if (state.selectedMiningUnit !== null && filter !== 'todos' && unidadesMineracao[state.selectedMiningUnit].tipo !== filter) {
+                state.selectedMiningUnit = null;
+                state.mapMarkers.forEach((marker) => marker.closePopup());
+            }
+            renderMiningUnits();
         }
 
         async function loadSelectedUnit() {
@@ -1220,6 +1537,11 @@
             $('#refresh-button').addEventListener('click', refreshData);
             $('#theme-button').addEventListener('click', toggleTheme);
             $('#export-button').addEventListener('click', exportDataCSV);
+            $('#map-origin-form').addEventListener('submit', searchMiningOrigin);
+            $('#map-geolocation').addEventListener('click', useCurrentLocation);
+            document.querySelectorAll('[data-map-filter]').forEach((button) => {
+                button.addEventListener('click', () => setMiningFilter(button.dataset.mapFilter));
+            });
             $('#sel-unidade').addEventListener('change', () => {
                 state.selectedUnit = UNIT_SHEETS.find((sheet) => sheet.gid === $('#sel-unidade').value) || UNIT_SHEETS[0];
                 state.currentUnit = state.unitCache.get(state.selectedUnit.gid) || null;
@@ -1255,6 +1577,8 @@
                 state.unitChart?.destroy();
                 state.overviewChart = null;
                 state.unitChart = null;
+                state.miningMap?.remove();
+                state.miningMap = null;
             });
         }
 
